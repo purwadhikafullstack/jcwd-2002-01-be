@@ -12,7 +12,11 @@ const User = (sequelize) => {
     },
     full_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
+    },
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     email: {
       type: DataTypes.STRING,
@@ -24,6 +28,10 @@ const User = (sequelize) => {
     },
     profile_image: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    DOB: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
   });
