@@ -1,7 +1,11 @@
 const authService = require("../services/auth");
+const {
+  runValidator,
+  rulesValidation,
+} = require("../validation/registerValidation");
 const router = require("express").Router();
 
-router.post("/register", async (req, res) => {
+router.post("/register", rulesValidation, runValidator, async (req, res) => {
   try {
     const serviceResult = await authService.register(req);
 
