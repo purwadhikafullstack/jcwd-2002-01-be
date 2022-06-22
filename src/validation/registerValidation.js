@@ -12,7 +12,11 @@ exports.runValidator = (req, res, next) => {
 };
 
 exports.rulesValidation = [
-  check("username").notEmpty().withMessage("username is required"),
+  check("username")
+    .notEmpty()
+    .withMessage("username is required")
+    .isString()
+    .withMessage("username cannot number "),
   check("email")
     .notEmpty()
     .withMessage("email is required")
