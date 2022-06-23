@@ -6,6 +6,7 @@ dotenv.config();
 
 const PORT = process.env.PORT;
 const { sequelize } = require("./lib/sequelize");
+
 sequelize.sync({ alter: true });
 
 const app = express();
@@ -16,6 +17,9 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("<h1>Final Project API</h1>");
 });
+const { authRoutes } = require("./routes");
+
+app.use("/auth", authRoutes);
 
 app.listen(PORT, () => {
   console.log("Listening in port", PORT);
