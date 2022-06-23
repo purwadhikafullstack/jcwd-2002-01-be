@@ -21,6 +21,14 @@ const { authRoutes } = require("./routes");
 
 app.use("/auth", authRoutes);
 
+const { userRoutes } = require("./routes");
+
+app.use(
+  "/profile_images",
+  express.static(`${__dirname}/public/profile-picture`)
+);
+app.use("/users", userRoutes);
+
 app.listen(PORT, () => {
   console.log("Listening in port", PORT);
 });
