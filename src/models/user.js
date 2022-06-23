@@ -22,6 +22,14 @@ const User = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    age: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     is_verified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

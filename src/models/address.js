@@ -28,7 +28,7 @@ const Address = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    kecematan: {
+    kecamatan: {
       type: DataTypes.STRING,
       allowNull: true,
     },
