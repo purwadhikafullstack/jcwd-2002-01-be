@@ -12,4 +12,6 @@ router.post(
   authController.register
 );
 
+router.get("/verify/:token", authController.verifyUser);
+
 module.exports = router;
