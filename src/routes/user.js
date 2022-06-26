@@ -48,7 +48,7 @@ router.patch(
   }
 );
 
-router.post("/address", async (req, res) => {
+router.post("/address/:id", async (req, res) => {
   try {
     const serviceResult = await UserService.addAddress(req);
 

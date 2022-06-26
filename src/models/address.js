@@ -12,6 +12,10 @@ const Address = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    address_label: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     recipient_telephone: {
       type: DataTypes.STRING,
       allowNull: false,
