@@ -9,7 +9,6 @@ class UserService extends Service {
 
       const findUser = await User.findByPk(id);
 
-
       const newUserData = await User.update(
         {
           full_name,
@@ -41,8 +40,7 @@ class UserService extends Service {
     try {
       const { id } = req.params;
 
-      const findUser = await User.findByPk(id)
-
+      const findUser = await User.findByPk(id);
 
       const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
       const filePath = "profile_images";
@@ -64,7 +62,6 @@ class UserService extends Service {
         statusCode: 200,
         data: newUserData,
       });
-
     } catch (err) {
       console.log(err);
 
@@ -90,26 +87,24 @@ class UserService extends Service {
         kecamatan,
         postal_code,
         is_main_address,
-        id,
+        address_label,
       } = req.body;
+      const { id } = req.params;
 
       const findUser = await User.findByPk(id);
 
-      await Address.create(
-        {
-          address,
-          recipient_name,
-          recipient_telephone,
-          kecamatan,
-          province,
-          city,
-          postal_code,
-          is_main_address,
-        },
-        {
-          where: { id: findUser.id },
-        }
-      );
+      await Address.create({
+        address,
+        recipient_name,
+        recipient_telephone,
+        kecamatan,
+        province,
+        city,
+        postal_code,
+        is_main_address,
+        address_label,
+        user_id: findUser.id,
+      });
 
       return this.handleSuccess({
         message: "address succesfuly added",
@@ -135,8 +130,9 @@ class UserService extends Service {
         kecamatan,
         postal_code,
         is_main_address,
-        id,
+        address_label,
       } = req.body;
+      const { id } = req.params;
 
       const findUser = await User.findByPk(id);
 
@@ -150,9 +146,10 @@ class UserService extends Service {
           kecamatan,
           postal_code,
           is_main_address,
+          address_label,
         },
         {
-          where: { id: findUser.id },
+          where: { user_id: findUser.id },
         }
       );
 
