@@ -10,11 +10,11 @@ const Admin = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    full_name: {
+    email: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    email: {
+    role: {
       type: DataTypes.STRING,
       allowNull: false,
     },
