@@ -1,4 +1,5 @@
 const { authController } = require("../controllers");
+const { AuthorizeLoggedInAdmin } = require("../middlewares/authMiddleware");
 const {
   runValidator,
   rulesValidation,
@@ -22,5 +23,11 @@ router.post(
 );
 
 router.post("/admin-login", authController.adminLogin);
+
+router.get(
+  "/admin/refresh-token",
+  AuthorizeLoggedInAdmin,
+  authController.adminKeepLogin
+);
 
 module.exports = router;

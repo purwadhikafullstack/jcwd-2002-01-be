@@ -246,5 +246,43 @@ class authService extends Service {
       });
     }
   };
+
+  static adminKeepLogin = async (req) => {
+    try {
+      const { token } = req;
+
+      const renewedToken = nanoid(64);
+      const findAdmin = await Admin.findByPk(token.admin_id);
+
+      delete findAdmin.dataValues.password;
+
+      await AdminLoginSession.update(
+        {
+          token: renewedToken,
+          valid_until: moment().add(1, "day"),
+        },
+        {
+          where: {
+            id: token.id,
+          },
+        }
+      );
+
+      return this.handleSuccess({
+        message: "Renewed user token",
+        statusCode: 200,
+        data: {
+          user: findAdmin,
+          token: renewedToken,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
 }
 module.exports = authService;
