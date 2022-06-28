@@ -17,7 +17,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("<h1>Final Project API</h1>");
 });
-const { authRoutes } = require("./routes");
+const { authRoutes, categoryRoutes, productRoutes } = require("./routes");
 
 app.use("/auth", authRoutes);
 
@@ -28,6 +28,8 @@ app.use(
   express.static(`${__dirname}/public/profile-picture`)
 );
 app.use("/users", userRoutes);
+app.use("/categories", categoryRoutes);
+app.use("/products", productRoutes);
 
 app.listen(PORT, () => {
   console.log("Listening in port", PORT);
