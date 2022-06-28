@@ -5,7 +5,12 @@ const { Op } = require("sequelize");
 const { nanoid } = require("nanoid");
 const moment = require("moment");
 const mailer = require("../../lib/mailer");
-const { User, VerificationToken } = require("../../lib/sequelize");
+const {
+  User,
+  VerificationToken,
+  Admin,
+  AdminLoginSession,
+} = require("../../lib/sequelize");
 const mustache = require("mustache");
 
 class authService extends Service {
@@ -74,7 +79,7 @@ class authService extends Service {
     }
   };
 
-  static VerifyUser = async (req) => {
+  static verifyUser = async (req) => {
     try {
       const { token } = req.params;
 
@@ -111,6 +116,130 @@ class authService extends Service {
         link: `http://localhost:3000/verification_page`,
       });
     } catch (err) {
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static adminRegister = async (req) => {
+    try {
+      const { username, email, password } = req.body;
+
+      const checkEmailUser = await User.findOne({
+        where: {
+          email,
+        },
+      });
+
+      if (checkEmailUser) {
+        return this.handleError({
+          message:
+            "This email has been registered as user account, email used by the user cannot be used by the admin",
+          statusCode: 400,
+        });
+      }
+
+      const checkEmailAdmin = await Admin.findOne({
+        where: {
+          email,
+        },
+      });
+
+      if (checkEmailAdmin) {
+        return this.handleError({
+          message:
+            "This email has been registered, if you forget your password, you can reset your password",
+          statusCode: 400,
+        });
+      }
+
+      const hashedPassword = bcrypt.hashSync(password, 5);
+      const newAdmin = await Admin.create({
+        username,
+        email,
+        password: hashedPassword,
+        role: "admin",
+      });
+
+      return this.handleSuccess({
+        message: "your account was created successfully",
+        statusCode: 201,
+        data: newAdmin,
+      });
+    } catch (err) {
+      console.log(err);
+
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static adminLogin = async (req) => {
+    try {
+      const { credential, password } = req.body;
+
+      const findAdmin = await Admin.findOne({
+        where: {
+          [Op.or]: [{ username: credential }, { email: credential }],
+        },
+      });
+
+      if (!findAdmin) {
+        return this.handleError({
+          message: "Wrong username or password",
+          statusCode: 400,
+        });
+      }
+
+      const isPasswordCorrect = bcrypt.compareSync(
+        password,
+        findAdmin.password
+      );
+
+      if (!isPasswordCorrect) {
+        return this.handleError({
+          message: "wrong username or password",
+          statusCode: 400,
+        });
+      }
+
+      delete findAdmin.dataValues.password;
+
+      await AdminLoginSession.update(
+        {
+          is_valid: false,
+        },
+        {
+          where: {
+            admin_id: findAdmin.id,
+            is_valid: true,
+          },
+        }
+      );
+
+      const sessionToken = nanoid(64);
+
+      await AdminLoginSession.create({
+        admin_id: findAdmin.id,
+        is_valid: true,
+        token: sessionToken,
+        valid_until: moment().add(1, "day"),
+      });
+
+      return this.handleSuccess({
+        message: "Logged in user",
+        statusCode: 200,
+        data: {
+          user: findAdmin,
+          token: sessionToken,
+        },
+      });
+    } catch (err) {
+      console.log(err);
       return this.handleError({
         message: "Server Error",
         statusCode: 500,

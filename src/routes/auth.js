@@ -14,4 +14,13 @@ router.post(
 
 router.get("/verify/:token", authController.verifyUser);
 
+router.post(
+  "/admin-register",
+  rulesValidation,
+  runValidator,
+  authController.adminRegister
+);
+
+router.post("/admin-login", authController.adminLogin);
+
 module.exports = router;
