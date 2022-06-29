@@ -1,5 +1,8 @@
 const { authController } = require("../controllers");
-const { AuthorizeLoggedInAdmin } = require("../middlewares/authMiddleware");
+const {
+  AuthorizeLoggedInAdmin,
+  AuthorizeLoggedInUser,
+} = require("../middlewares/authMiddleware");
 const {
   runValidator,
   rulesValidation,
@@ -22,12 +25,20 @@ router.post(
   authController.adminRegister
 );
 
+router.post("/user-login", authController.userLogin);
+
 router.post("/admin-login", authController.adminLogin);
 
 router.get(
   "/admin/refresh-token",
   AuthorizeLoggedInAdmin,
   authController.adminKeepLogin
+);
+
+router.get(
+  "/user/refresh-token",
+  AuthorizeLoggedInUser,
+  authController.UserKeepLogin
 );
 
 module.exports = router;

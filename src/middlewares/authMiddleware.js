@@ -1,4 +1,4 @@
-const { adminVerifySession } = require("../lib/session");
+const { adminVerifySession, UserVerifySession } = require("../lib/session");
 
 const AuthorizeLoggedInAdmin = async (req, res, next) => {
   try {
@@ -19,6 +19,26 @@ const AuthorizeLoggedInAdmin = async (req, res, next) => {
   }
 };
 
+const AuthorizeLoggedInUser = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization;
+
+    const verifiedToken = await UserVerifySession(token);
+
+    if (!verifiedToken) throw new Error("Session invalid/expired");
+
+    req.token = verifiedToken.dataValues;
+
+    next();
+  } catch (err) {
+    console.log(err);
+    return res.status(419).json({
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   AuthorizeLoggedInAdmin,
+  AuthorizeLoggedInUser,
 };
