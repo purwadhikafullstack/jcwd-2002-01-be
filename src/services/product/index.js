@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { Product, ProductImage } = require("../../lib/sequelize");
 const Service = require("../service");
 
@@ -14,15 +15,19 @@ class ProductService extends Service {
       const findProducts = await Product.findAndCountAll({
         where: {
           ...req.query,
+          name: {
+            [Op.like]: `%${req.query.name}%`,
+          },
         },
         include: [
-            {
-                model: ProductImage,
-                attributes: ["image_url"]
-            }
+          {
+            model: ProductImage,
+            attributes: ["image_url"],
+          },
         ],
         limit: _limit ? parseInt(_limit) : undefined,
         offset: (_page - 1) * _limit,
+        distinct: true,
         order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
       });
 
@@ -38,6 +43,9 @@ class ProductService extends Service {
         statusCode: 500,
       });
     }
+  };
+
+  static editProduct = async (req) => {
   };
 }
 
