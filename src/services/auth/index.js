@@ -10,6 +10,7 @@ const {
   VerificationToken,
   Admin,
   AdminLoginSession,
+  UserLoginSession,
 } = require("../../lib/sequelize");
 const mustache = require("mustache");
 
@@ -116,6 +117,110 @@ class authService extends Service {
         link: `http://localhost:3000/verification_page`,
       });
     } catch (err) {
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static userLogin = async (req) => {
+    try {
+      const { credential, password } = req.body;
+
+      const findUser = await User.findOne({
+        where: {
+          [Op.or]: [{ username: credential }, { email: credential }],
+        },
+      });
+
+      if (!findUser) {
+        return this.handleError({
+          message: "Wrong username or password",
+          statusCode: 400,
+        });
+      }
+
+      const isPasswordCorrect = bcrypt.compareSync(password, findUser.password);
+
+      if (!isPasswordCorrect) {
+        return this.handleError({
+          message: "wrong username or password",
+          statusCode: 400,
+        });
+      }
+
+      delete findUser.dataValues.password;
+
+      await UserLoginSession.update(
+        {
+          is_valid: false,
+        },
+        {
+          where: {
+            user_id: findUser.id,
+            is_valid: true,
+          },
+        }
+      );
+
+      const sessionToken = nanoid(64);
+
+      await UserLoginSession.create({
+        user_id: findUser.id,
+        is_valid: true,
+        token: sessionToken,
+        valid_until: moment().add(1, "day"),
+      });
+
+      return this.handleSuccess({
+        message: "Logged in user",
+        statusCode: 200,
+        data: {
+          user: findUser,
+          token: sessionToken,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static userKeepLogin = async (req) => {
+    try {
+      const { token } = req;
+
+      const renewedToken = nanoid(64);
+
+      const findUser = await User.findByPk(token.user_id);
+
+      delete findUser.dataValues.password;
+
+      await UserLoginSession.update(
+        {
+          token: renewedToken,
+          valid_until: moment().add(1, "day"),
+        },
+        {
+          where: {
+            id: token.id,
+          },
+        }
+      );
+      return this.handleSuccess({
+        message: "Renewed user token",
+        statusCode: 200,
+        data: {
+          user: findUser,
+          token: renewedToken,
+        },
+      });
+    } catch (err) {
+      console.log(err);
       return this.handleError({
         message: "Server Error",
         statusCode: 500,
@@ -236,6 +341,45 @@ class authService extends Service {
         data: {
           user: findAdmin,
           token: sessionToken,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static adminKeepLogin = async (req) => {
+    try {
+      const { token } = req;
+
+      const renewedToken = nanoid(64);
+
+      const findAdmin = await Admin.findByPk(token.admin_id);
+
+      delete findAdmin.dataValues.password;
+
+      await AdminLoginSession.update(
+        {
+          token: renewedToken,
+          valid_until: moment().add(1, "day"),
+        },
+        {
+          where: {
+            id: token.id,
+          },
+        }
+      );
+
+      return this.handleSuccess({
+        message: "Renewed user token",
+        statusCode: 200,
+        data: {
+          user: findAdmin,
+          token: renewedToken,
         },
       });
     } catch (err) {
