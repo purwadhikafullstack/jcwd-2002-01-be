@@ -1,6 +1,7 @@
 const { productController } = require("../controllers");
 const fileUploader = require("../lib/uploader");
 const ProductService = require("../services/product");
+const productControllers = require("../controllers/productController");
 
 const { AuthorizeLoggedInAdmin } = require("../middlewares/authMiddleware");
 
