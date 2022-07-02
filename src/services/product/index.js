@@ -1,6 +1,12 @@
 const { Op } = require("sequelize");
-const { Product, ProductImage } = require("../../lib/sequelize");
+const {
+  Product,
+  ProductImage,
+  Inventory,
+  PurchaseOrder,
+} = require("../../lib/sequelize");
 const Service = require("../service");
+const fs = require("fs");
 
 class ProductService extends Service {
   static getProduct = async (req) => {
@@ -79,6 +85,86 @@ class ProductService extends Service {
         message: "get all products",
         statusCode: 200,
         data: findProducts,
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static createProduct = async (req) => {
+    try {
+      const { name, price, no_bpom, no_medicine, packaging, discount } =
+        req.body;
+
+      const newProduct = await Product.create({
+        name,
+        price,
+        no_bpom,
+        no_medicine,
+        packaging,
+        discount,
+      });
+
+      const productId = newProduct.dataValues.id;
+
+      const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
+      const filePath = "product_images";
+      const filename = req.files;
+
+      const listFile = filename.map((val) => {
+        return {
+          image_url: `${uploadFileDomain}/${filePath}/${val.filename}`,
+          product_id: productId,
+        };
+      });
+
+      await ProductImage.bulkCreate(listFile);
+
+      return this.handleSuccess({
+        message: "Created New Product",
+        statusCode: 201,
+        data: newProduct,
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static addStockProduct = async (req) => {
+    try {
+      const { productName, quantity, expired_date, purchasePrice } = req.body;
+
+      const findProduct = await Product.findOne({
+        where: { name: productName },
+      });
+
+      const productId = findProduct.dataValues.id;
+
+      const newStock = await Inventory.create({
+        quantity,
+        expired_date,
+        type: "available",
+        product_id: productId,
+      });
+
+      await PurchaseOrder.create({
+        quantity,
+        price: purchasePrice,
+        product_id: productId,
+      });
+
+      return this.handleSuccess({
+        message: "Created New Product",
+        statusCode: 201,
+        data: newStock,
       });
     } catch (err) {
       console.log(err);
