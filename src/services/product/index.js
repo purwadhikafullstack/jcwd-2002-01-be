@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Product, ProductImage, Category } = require("../../lib/sequelize");
+const { Product, ProductImage } = require("../../lib/sequelize");
 const Service = require("../service");
 
 class ProductService extends Service {
