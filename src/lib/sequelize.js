@@ -25,7 +25,7 @@ const Inventory = require("../models/inventory")(sequelize);
 const ProductImage = require("../models/product_image")(sequelize);
 const Cart = require("../models/cart")(sequelize);
 const Category = require("../models/category")(sequelize);
-const ProductCategory = require("../models/product_category")(sequelize);
+// const ProductCategory = require("../models/product_category")(sequelize);
 const Transaction = require("../models/transaction")(sequelize);
 const TransactionItem = require("../models/transaction_item")(sequelize);
 const Payment = require("../models/payment")(sequelize);
@@ -70,21 +70,9 @@ Product.hasMany(Cart, { foreignKey: "product_id" });
 Cart.belongsTo(User, { foreignKey: "user_id" });
 User.hasMany(Cart, { foreignKey: "user_id" });
 
-// M:M product and category
-Product.belongsToMany(Category, {
-  through: ProductCategory,
-  foreignKey: "product_id",
-  as: "product_category",
-});
-Category.belongsToMany(Product, {
-  through: ProductCategory,
-  foreignKey: "category_id",
-  as: "product_category",
-});
-Product.hasMany(ProductCategory, { foreignKey: "product_id" });
-ProductCategory.belongsTo(Product, { foreignKey: "product_id" });
-Category.hasMany(ProductCategory, { foreignKey: "category_id" });
-ProductCategory.belongsTo(Category, { foreignKey: "category_id" });
+//1:M category and product
+Category.hasMany(Product);
+Product.belongsTo(Category);
 
 //1:M cart and user
 TransactionItem.belongsTo(Transaction, { foreignKey: "transaction_id" });
@@ -114,7 +102,7 @@ module.exports = {
   ProductImage,
   Cart,
   Category,
-  ProductCategory,
+  // ProductCategory,
   Transaction,
   TransactionItem,
   Payment,
