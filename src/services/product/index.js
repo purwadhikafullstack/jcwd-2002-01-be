@@ -36,13 +36,23 @@ class ProductService extends Service {
 
   static getAllProduct = async (req) => {
     try {
-      const { _limit = 30, _page = 1, _sortBy = "", _sortDir = "" } = req.query;
+
+      const { _limit = 30, _page = 1, _sortBy = "", _sortDir = "", name = "", selectedCategory} = req.query;
+
+
       delete req.query._limit;
       delete req.query._page;
       delete req.query._sortBy;
       delete req.query._sortDir;
       delete req.query.name;
       delete req.query.selectedCategory;
+
+      const whereCategoryClause = {};
+
+      if (selectedCategory) {
+        whereCategoryClause.CategoryId = selectedCategory;
+      }
+
 
       const findProducts = await Product.findAndCountAll({
         where: {
@@ -51,6 +61,7 @@ class ProductService extends Service {
           name: {
             [Op.like]: `%${name}%`,
           },
+          ...whereCategoryClause,
         },
         include: [
           {
