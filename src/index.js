@@ -27,6 +27,7 @@ app.use(
   "/profile_images",
   express.static(`${__dirname}/public/profile-picture`)
 );
+app.use("/product_images", express.static(`${__dirname}/public/product-image`));
 app.use("/users", userRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);

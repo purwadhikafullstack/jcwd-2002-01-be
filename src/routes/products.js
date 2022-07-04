@@ -1,3 +1,5 @@
+const { productController } = require("../controllers");
+const fileUploader = require("../lib/uploader");
 const ProductService = require("../services/product");
 const productControllers = require("../controllers/productController");
 
@@ -22,5 +24,17 @@ router.get("/", async (req, res) => {
     });
   }
 });
+
+router.post(
+  "/",
+  fileUploader({
+    destinationFolder: "product-image",
+    fileType: "image",
+    prefix: "POST",
+  }).array("product_image_file"),
+  productController.createProduct
+);
+
+router.post("/addstock", productController.createProductStock);
 
 module.exports = router;
