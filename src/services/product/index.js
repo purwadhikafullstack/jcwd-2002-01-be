@@ -4,6 +4,7 @@ const {
   ProductImage,
   Inventory,
   PurchaseOrder,
+  Category,
 } = require("../../lib/sequelize");
 const Service = require("../service");
 const fs = require("fs");
@@ -67,7 +68,6 @@ class ProductService extends Service {
       const findProducts = await Product.findAndCountAll({
         where: {
           ...req.query,
-          categoryId: selectedCategory,
           name: {
             [Op.like]: `%${name}%`,
           },
@@ -101,8 +101,21 @@ class ProductService extends Service {
 
   static createProduct = async (req) => {
     try {
-      const { name, price, no_bpom, no_medicine, packaging, discount } =
-        req.body;
+      const {
+        name,
+        price,
+        no_bpom,
+        no_medicine,
+        packaging,
+        discount,
+        categoryName,
+      } = req.body;
+
+      const findCategory = await Category.findOne({
+        where: { name: categoryName },
+      });
+
+      const categoryId = findCategory.dataValues.id;
 
       const newProduct = await Product.create({
         name,
@@ -111,6 +124,7 @@ class ProductService extends Service {
         no_medicine,
         packaging,
         discount,
+        CategoryId: categoryId,
       });
 
       const productId = newProduct.dataValues.id;
