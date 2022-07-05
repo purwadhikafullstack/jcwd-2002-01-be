@@ -4,7 +4,7 @@ const fileUploader = require("../lib/uploader");
 
 const router = require("express").Router();
 
-router.get("/:productId", productControllers.getProduct);
+router.get("/byId/:productId", productControllers.getProduct);
 
 router.get("/", async (req, res) => {
   try {
@@ -35,5 +35,7 @@ router.post(
 );
 
 router.post("/addstock", productControllers.createProductStock);
+
+router.get("/quantity", productControllers.getAllProductWithQuantity);
 
 module.exports = router;

@@ -18,9 +18,9 @@ const productControllers = {
     }
   },
 
-  getAllProduct: async (req, res) => {
+  getAllProductWithQuantity: async (req, res) => {
     try {
-      const serviceResult = await ProductService.getAllProduct(req.query);
+      const serviceResult = await ProductService.getAllProductWithQuantity(req);
       if (!serviceResult.success) throw serviceResult;
       return res.status(serviceResult.statusCode || 200).json({
         message: serviceResult.message,
