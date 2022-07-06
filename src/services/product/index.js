@@ -5,6 +5,7 @@ const {
   Category,
   Inventory,
   StockOpname,
+  PurchaseOrder,
 } = require("../../lib/sequelize");
 const Service = require("../service");
 
@@ -171,6 +172,38 @@ class ProductService extends Service {
         type: "available",
         product_id: productId,
       });
+
+      const findStockOpnames = await StockOpname.findOne({
+        where: { product_id: productId },
+      });
+
+      if (!findStockOpnames) {
+        await StockOpname.create({
+          amount: quantity,
+          product_id: productId,
+        });
+      } else {
+        const findAvailableInventoryByProductId = await Inventory.findAll({
+          where: {
+            type: "available",
+            product_id: productId,
+          },
+          attributes: ["quantity"],
+        });
+
+        const StockAvailable = findAvailableInventoryByProductId.map(
+          (val) => val.dataValues.quantity
+        );
+
+        const newTotalStockInStockOpname = StockAvailable.reduce(
+          (total, num) => total + num
+        );
+
+        await StockOpname.update(
+          { amount: newTotalStockInStockOpname },
+          { where: { product_id: productId } }
+        );
+      }
 
       await PurchaseOrder.create({
         quantity,
