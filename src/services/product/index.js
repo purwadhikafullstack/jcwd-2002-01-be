@@ -2,9 +2,10 @@ const { Op } = require("sequelize");
 const {
   Product,
   ProductImage,
-  Inventory,
-  PurchaseOrder,
   Category,
+  Inventory,
+  StockOpname,
+  PurchaseOrder,
 } = require("../../lib/sequelize");
 const Service = require("../service");
 const fs = require("fs");
