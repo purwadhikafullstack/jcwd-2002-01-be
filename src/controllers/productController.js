@@ -52,11 +52,11 @@ const productControllers = {
     }
   },
 
-  createProduct: async (req, res) => {
+  getAllProductWithQuantity: async (req, res) => {
     try {
-      const serviceResult = await ProductService.createProduct(req);
+      const serviceResult = await ProductService.getAllProductWithQuantity(req);
       if (!serviceResult.success) throw serviceResult;
-      return res.status(serviceResult.statusCode || 201).json({
+      return res.status(serviceResult.statusCode || 200).json({
         message: serviceResult.message,
         result: serviceResult.data,
       });
