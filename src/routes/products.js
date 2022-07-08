@@ -86,4 +86,6 @@ router.delete(
 
 router.get("/invenroty/:productId", productController.getInventoryByProductId);
 
+router.get("/quantity", productControllers.getAllProductWithQuantity);
+
 module.exports = router;
