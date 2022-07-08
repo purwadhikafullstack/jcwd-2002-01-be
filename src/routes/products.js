@@ -5,7 +5,7 @@ const productControllers = require("../controllers/productController");
 
 const router = require("express").Router();
 
-router.get("/:productId", productControllers.getProduct);
+router.get("/byId/:productId", productControllers.getProduct);
 
 router.get("/", async (req, res) => {
   try {
@@ -36,5 +36,7 @@ router.post(
 );
 
 router.post("/addstock", productController.createProductStock);
+
+router.get("/quantity", productControllers.getAllProductWithQuantity);
 
 module.exports = router;

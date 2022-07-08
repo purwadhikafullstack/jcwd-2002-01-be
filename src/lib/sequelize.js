@@ -31,6 +31,7 @@ const TransactionItem = require("../models/transaction_item")(sequelize);
 const Payment = require("../models/payment")(sequelize);
 const PurchaseOrder = require("../models/purchase_order")(sequelize);
 const MutationStock = require("../models/mutation_stock")(sequelize);
+const StockOpname = require("../models/stock_opname")(sequelize);
 
 //relation
 
@@ -65,6 +66,9 @@ Product.hasMany(ProductImage, { foreignKey: "product_id" });
 //1:M cart and product
 Cart.belongsTo(Product, { foreignKey: "product_id" });
 Product.hasMany(Cart, { foreignKey: "product_id" });
+
+StockOpname.belongsTo(Product, { foreignKey: "product_id" });
+Product.hasMany(StockOpname, { foreignKey: "product_id" });
 
 //1:M cart and user
 Cart.belongsTo(User, { foreignKey: "user_id" });
@@ -108,5 +112,6 @@ module.exports = {
   Payment,
   PurchaseOrder,
   MutationStock,
+  StockOpname,
   sequelize,
 };
