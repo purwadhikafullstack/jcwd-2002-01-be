@@ -16,6 +16,12 @@ class ProductService extends Service {
       const { productId } = req.params;
 
       const getProductData = await Product.findOne({
+        include: [
+          {
+            model: ProductImage,
+            attributes: ["image_url"],
+          },
+        ],
         where: {
           id: productId,
         },
