@@ -14,10 +14,6 @@ const Cart = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    total_price: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
   });
 };
 

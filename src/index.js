@@ -17,7 +17,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("<h1>Final Project API</h1>");
 });
-const { authRoutes, categoryRoutes, productRoutes, cartRoutes } = require("./routes");
+const { authRoutes, categoryRoutes, productRoutes, cartRoutes, addressRoutes } = require("./routes");
 
 app.use("/auth", authRoutes);
 
@@ -32,6 +32,7 @@ app.use("/users", userRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);
 app.use("/cart", cartRoutes)
+app.use("/address", addressRoutes)
 
 app.listen(PORT, () => {
   console.log("Listening in port", PORT);

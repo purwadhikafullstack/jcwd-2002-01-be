@@ -1,4 +1,5 @@
 const fs = require("fs");
+const axiosInstance = require("../../lib/rajaOngkirInstance");
 const { User, Address } = require("../../lib/sequelize");
 const Service = require("../service");
 
@@ -89,26 +90,46 @@ class UserService extends Service {
         is_main_address,
         address_label,
       } = req.body;
-      const { id } = req.params;
+      const user_id = req.token.user_id;
 
-      const findUser = await User.findByPk(id);
+      if (is_main_address) {
+        const findMainAddress = await Address.findOne({
+          where: {
+            is_main_address: true,
+            user_id
+          },
+        });
 
-      await Address.create({
+        if (findMainAddress) {
+          findMainAddress.is_main_address = false;
+          findMainAddress.save();
+        }
+      }
+
+      const getProvince = await axiosInstance.get(`/province?id=${province}`);
+      const getCity = await axiosInstance.get(`/city?id=${city}`);
+
+      const provinceName = getProvince.data.rajaongkir.results.province;
+
+      const cityName = getCity.data.rajaongkir.results.city_name;
+
+      const newAddress = await Address.create({
         address,
         recipient_name,
         recipient_telephone,
         kecamatan,
-        province,
-        city,
+        province: provinceName,
+        city: cityName,
         postal_code,
         is_main_address,
         address_label,
-        user_id: findUser.id,
+        user_id,
       });
 
       return this.handleSuccess({
         message: "address succesfuly added",
         statusCode: 201,
+        data: newAddress,
       });
     } catch (err) {
       console.log(err);
@@ -132,9 +153,7 @@ class UserService extends Service {
         is_main_address,
         address_label,
       } = req.body;
-      const { id } = req.params;
-
-      const findUser = await User.findByPk(id);
+      const user_id = req.token.user_id;
 
       const editAddress = await Address.update(
         {
@@ -149,7 +168,7 @@ class UserService extends Service {
           address_label,
         },
         {
-          where: { user_id: findUser.id },
+          where: { user_id },
         }
       );
 

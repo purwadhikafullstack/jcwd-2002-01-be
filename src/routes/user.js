@@ -1,4 +1,5 @@
 const fileUploader = require("../lib/uploader");
+const { AuthorizeLoggedInUser } = require("../middlewares/authMiddleware");
 const UserService = require("../services/user");
 
 const router = require("express").Router();
@@ -45,7 +46,7 @@ router.patch(
   }
 );
 
-router.post("/address", async (req, res) => {
+router.post("/address", AuthorizeLoggedInUser,async (req, res) => {
   try {
     const serviceResult = await UserService.addAddress(req);
 
