@@ -269,14 +269,14 @@ class UserService extends Service {
         where: {
           ...query,
           ...statusClause,
-          user_id
+          user_id,
         },
         include: [
           {
             model: TransactionItem,
             include: [
               {
-                model : Product,
+                model: Product,
                 include: {
                   model: ProductImage,
                 },

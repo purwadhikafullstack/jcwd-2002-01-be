@@ -182,7 +182,6 @@ class CartService extends Service {
         user_id,
       });
 
-
       const findCart = await Cart.findAll({
         where: {
           id: {
