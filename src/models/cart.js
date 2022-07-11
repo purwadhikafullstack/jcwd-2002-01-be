@@ -10,11 +10,7 @@ const Cart = (sequelize) => {
       // product_id
       // user_id
     },
-    quntity: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    total_price: {
+    quantity: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
