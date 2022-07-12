@@ -232,7 +232,80 @@ class ProductService extends Service {
     }
   };
 
-  static editProduct = async (req) => {};
+  static editProduct = async (req) => {
+    try {
+      const { productId } = req.params;
+      const { productName, price, category_Id } = req.body;
+
+      const checkDuplicate = await Product.findOne({
+        where: {
+          name: productName,
+          id: {
+            [Op.ne]: productId,
+          },
+        },
+      });
+
+      if (checkDuplicate?.dataValues.name === productName) {
+        return this.handleError({
+          message: "data duplicate please try another med_name",
+          statusCode: 400,
+        });
+      }
+
+      // const findProduct = await Product.findOne({
+      //   where: { name: productName },
+      // });
+
+      // if (findProduct) {
+      //   if (findProduct.id !== productId) {
+      //     return this.handleError({
+      //       message: "Product Name already taken",
+      //       statusCode: 400,
+      //     });
+      //   }else{
+
+      //   }
+      // }
+
+      await Product.update(
+        {
+          name: productName,
+          price,
+          CategoryId: category_Id,
+        },
+        {
+          where: { id: productId },
+        }
+      );
+
+      const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
+      const filePath = "product_images";
+      const filename = req.files;
+
+      if (filename) {
+        const listFile = filename.map((val) => {
+          return {
+            image_url: `${uploadFileDomain}/${filePath}/${val.filename}`,
+            product_id: productId,
+          };
+        });
+
+        await ProductImage.bulkCreate(listFile);
+      }
+
+      return this.handleSuccess({
+        message: "product edited",
+        statusCode: 200,
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
 
   static getAllProductWithQuantity = async (req) => {
     try {
@@ -273,6 +346,10 @@ class ProductService extends Service {
           {
             model: StockOpname,
           },
+          {
+            model: ProductImage,
+            attributes: ["image_url", "id", "product_id"],
+          },
         ],
         limit: _limit ? parseInt(_limit) : undefined,
         offset: (_page - 1) * _limit,
@@ -291,6 +368,26 @@ class ProductService extends Service {
         message: "server error",
         statusCode: 500,
       });
+    }
+  };
+
+  static deleteProductImage = async (req) => {
+    try {
+      const { productId, id } = req.params;
+
+      await ProductImage.destroy({
+        where: {
+          product_id: productId,
+          id,
+        },
+      });
+
+      return this.handleSuccess({
+        message: "succes delete image",
+        statusCode: 200,
+      });
+    } catch (err) {
+      return this.handleError({});
     }
   };
 }
