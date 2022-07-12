@@ -1,7 +1,6 @@
 const { productController } = require("../controllers");
 const fileUploader = require("../lib/uploader");
 const ProductService = require("../services/product");
-const productControllers = require("../controllers/productController");
 
 const { AuthorizeLoggedInAdmin } = require("../middlewares/authMiddleware");
 
@@ -61,6 +60,20 @@ router.delete(
 
 router.get("/invenroty/:productId", productController.getInventoryByProductId);
 
-router.get("/quantity", productControllers.getAllProductWithQuantity);
+router.get("/quantity", productController.getAllProductWithQuantity);
+router.patch(
+  "/edit/:productId",
+  fileUploader({
+    destinationFolder: "product-image",
+    fileType: "image",
+    prefix: "POST",
+  }).array("product_image_file"),
+  productController.editProduct
+);
+
+router.delete(
+  "/product-image/:id/images/:productId",
+  productController.deleteProductImage
+);
 
 module.exports = router;
