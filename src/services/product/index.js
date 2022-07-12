@@ -231,18 +231,36 @@ class ProductService extends Service {
       const { productId } = req.params;
       const { productName, price, category_Id } = req.body;
 
-      const findProduct = await Product.findOne({
-        where: { name: productName },
+      const checkDuplicate = await Product.findOne({
+        where: {
+          name: productName,
+          id: {
+            [Op.ne]: productId,
+          },
+        },
       });
 
-      if (findProduct) {
-        if (findProduct.id !== productId) {
-          return this.handleError({
-            message: "Product Name already taken",
-            statusCode: 400,
-          });
-        }
+      if (checkDuplicate?.dataValues.name === productName) {
+        return this.handleError({
+          message: "data duplicate please try another med_name",
+          statusCode: 400,
+        });
       }
+
+      // const findProduct = await Product.findOne({
+      //   where: { name: productName },
+      // });
+
+      // if (findProduct) {
+      //   if (findProduct.id !== productId) {
+      //     return this.handleError({
+      //       message: "Product Name already taken",
+      //       statusCode: 400,
+      //     });
+      //   }else{
+
+      //   }
+      // }
 
       await Product.update(
         {
