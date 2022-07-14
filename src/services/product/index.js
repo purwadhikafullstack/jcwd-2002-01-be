@@ -6,6 +6,7 @@ const {
   Inventory,
   StockOpname,
   PurchaseOrder,
+  Admin,
 } = require("../../lib/sequelize");
 const Service = require("../service");
 const fs = require("fs");
@@ -165,6 +166,7 @@ class ProductService extends Service {
 
   static addStockProduct = async (req) => {
     try {
+      const { token } = req;
       const { productName, quantity, expired_date, purchasePrice } = req.body;
 
       const findProduct = await Product.findOne({
@@ -178,6 +180,7 @@ class ProductService extends Service {
         expired_date,
         type: "available",
         product_id: productId,
+        admin_id: token.admin_id,
       });
 
       const findStockOpnames = await StockOpname.findOne({
@@ -252,21 +255,6 @@ class ProductService extends Service {
           statusCode: 400,
         });
       }
-
-      // const findProduct = await Product.findOne({
-      //   where: { name: productName },
-      // });
-
-      // if (findProduct) {
-      //   if (findProduct.id !== productId) {
-      //     return this.handleError({
-      //       message: "Product Name already taken",
-      //       statusCode: 400,
-      //     });
-      //   }else{
-
-      //   }
-      // }
 
       await Product.update(
         {
@@ -388,6 +376,46 @@ class ProductService extends Service {
       });
     } catch (err) {
       return this.handleError({});
+    }
+  };
+
+  static getStockByProductId = async (req) => {
+    try {
+      const { _limit = 30, _page = 1 } = req.query;
+      const { productId } = req.params;
+
+      delete req.query._limit;
+      delete req.query._page;
+
+      const findInventory = await Inventory.findAndCountAll({
+        where: {
+          product_id: productId,
+          ...req.query,
+        },
+        include: [
+          {
+            model: Product,
+            attributes: ["id"],
+            include: [StockOpname],
+            required: false,
+          },
+          { model: Admin },
+        ],
+        limit: _limit ? parseInt(_limit) : undefined,
+        offset: (_page - 1) * _limit,
+        distinct: true,
+      });
+      return this.handleSuccess({
+        message: "get all inventory",
+        statusCode: 200,
+        data: findInventory,
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
     }
   };
 }

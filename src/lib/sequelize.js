@@ -93,6 +93,9 @@ Product.hasMany(PurchaseOrder, { foreignKey: "product_id" });
 MutationStock.belongsTo(Product, { foreignKey: "product_id" });
 Product.hasMany(MutationStock, { foreignKey: "product_id" });
 
+Inventory.belongsTo(Admin, { foreignKey: "admin_id" });
+Admin.hasMany(Inventory, { foreignKey: "admin_id" });
+
 module.exports = {
   User,
   Admin,
