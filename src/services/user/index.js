@@ -192,6 +192,7 @@ class UserService extends Service {
       });
     }
   };
+
   static getAddress = async (req) => {
     try {
       const user_id = req.token.user_id;
