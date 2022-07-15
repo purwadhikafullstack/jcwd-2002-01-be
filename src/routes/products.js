@@ -2,6 +2,8 @@ const { productController } = require("../controllers");
 const fileUploader = require("../lib/uploader");
 const ProductService = require("../services/product");
 
+const { AuthorizeLoggedInAdmin } = require("../middlewares/authMiddleware");
+
 const router = require("express").Router();
 
 router.get("/byId/:productId", productController.getProduct);
@@ -34,7 +36,11 @@ router.post(
   productController.createProduct
 );
 
-router.post("/addstock", productController.createProductStock);
+router.post(
+  "/addstock",
+  AuthorizeLoggedInAdmin,
+  productController.createProductStock
+);
 
 router.get("/quantity", productController.getAllProductWithQuantity);
 router.patch(
@@ -51,5 +57,7 @@ router.delete(
   "/product-image/:id/images/:productId",
   productController.deleteProductImage
 );
+
+router.get("/invenroty/:productId", productController.getInventoryByProductId);
 
 module.exports = router;
