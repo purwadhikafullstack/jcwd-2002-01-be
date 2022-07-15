@@ -147,7 +147,6 @@ const productControllers = {
       });
     }
   },
-
   getInventoryByProductId: async (req, res) => {
     try {
       const serviceResult = await ProductService.getStockByProductId(req);

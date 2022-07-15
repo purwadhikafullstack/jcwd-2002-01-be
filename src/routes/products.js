@@ -101,4 +101,6 @@ router.delete(
   productController.deleteProductImage
 );
 
+router.get("/invenroty/:productId", productController.getInventoryByProductId);
+
 module.exports = router;
