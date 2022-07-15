@@ -25,12 +25,24 @@ class AddressService extends Service {
       const { province_id } = req.params;
       const city = await axiosInstance.get(`/city?province=${province_id}`);
 
-
       return this.handleSuccess({
         message: "get province",
         statusCode: 200,
         data: city.data.rajaongkir.results,
       });
+    } catch (err) {
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+  static getOngkir = async (req) => {
+    try {
+      const { product_id } = req.body;
+
+      
+
     } catch (err) {
       return this.handleError({
         message: "server error",

@@ -12,7 +12,11 @@ const Transaction = (sequelize) => {
     },
     recipe_image: {
       type: DataTypes.STRING,
+<<<<<<< Updated upstream
       allowNull: true,
+=======
+      allowNull: true
+>>>>>>> Stashed changes
     },
     valid_until: {
       type: DataTypes.DATE,

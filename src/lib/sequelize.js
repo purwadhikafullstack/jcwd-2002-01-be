@@ -74,6 +74,13 @@ Product.hasMany(StockOpname, { foreignKey: "product_id" });
 Cart.belongsTo(User, { foreignKey: "user_id" });
 User.hasMany(Cart, { foreignKey: "user_id" });
 
+//1:M Product and transaction detail
+TransactionItem.belongsTo(Product, { foreignKey: "product_id" });
+Product.hasMany(TransactionItem, { foreignKey: "product_id" });
+
+Transaction.belongsTo(User, { foreignKey: "user_id" });
+User.hasMany(Transaction, { foreignKey: "user_id" });
+
 //1:M category and product
 Category.hasMany(Product);
 Product.belongsTo(Category);

@@ -93,17 +93,17 @@ class UserService extends Service {
       const user_id = req.token.user_id;
 
       if (is_main_address) {
-        const findMainAddress = await Address.findOne({
-          where: {
-            is_main_address: true,
-            user_id
+        const findAddress = await Address.update(
+          {
+            is_main_address: false,
           },
-        });
-
-        if (findMainAddress) {
-          findMainAddress.is_main_address = false;
-          findMainAddress.save();
-        }
+          {
+            where: {
+              is_main_address: true,
+              user_id,
+            },
+          }
+        );
       }
 
       const getProvince = await axiosInstance.get(`/province?id=${province}`);
@@ -179,6 +179,56 @@ class UserService extends Service {
       });
     } catch (err) {
       console.log(err);
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+  static getAddress = async (req) => {
+    try {
+      const user_id = req.token.user_id;
+
+      const findAddress = await Address.findAll({
+        where: {
+          user_id,
+        },
+      });
+
+      if (!findAddress) {
+        return this.handleError({
+          message: "address not found",
+          statusCode: 400,
+        });
+      }
+
+      return this.handleSuccess({
+        message: "get all address",
+        statusCode: 200,
+        data: findAddress,
+      });
+    } catch (err) {
+      this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+  static getMainAddress = async (user_id) => {
+    try {
+      const findMainAddress = await Address.findOne({
+        where: {
+          is_main_address: true,
+          user_id,
+        },
+      });
+
+      return this.handleSuccess({
+        message: "get main address",
+        statusCode: 200,
+        data: findMainAddress,
+      });
+    } catch (err) {
       return this.handleError({
         message: "server error",
         statusCode: 500,
