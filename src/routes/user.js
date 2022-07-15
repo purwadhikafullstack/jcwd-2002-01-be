@@ -15,6 +15,7 @@ router.patch(
   }).single("profile_image_file"),
   userController.editAvatar
 );
+
 router.post("/address", AuthorizeLoggedInUser, userController.addNewAddress);
 router.get("/address", AuthorizeLoggedInUser, userController.getAllAddress);
 router.get("/transaction", AuthorizeLoggedInUser, userController.getAllUserTransaction);
