@@ -6,7 +6,6 @@ const paymentController = require("./paymentController");
 const transactionController = require("./transactionController");
 
 
-
 module.exports = {
   authController,
   productController,
