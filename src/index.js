@@ -17,7 +17,14 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("<h1>Final Project API</h1>");
 });
-const { authRoutes, categoryRoutes, productRoutes, cartRoutes, addressRoutes } = require("./routes");
+const {
+  authRoutes,
+  categoryRoutes,
+  productRoutes,
+  cartRoutes,
+  addressRoutes,
+  paymentRoutes,
+} = require("./routes");
 
 app.use("/auth", authRoutes);
 
@@ -27,12 +34,18 @@ app.use(
   "/profile_images",
   express.static(`${__dirname}/public/profile-picture`)
 );
+app.use(
+  "/payment_images",
+  express.static(`${__dirname}/public/proof-of-payment`)
+);
 app.use("/product_images", express.static(`${__dirname}/public/product-image`));
+
+app.use("/payment", paymentRoutes);
 app.use("/users", userRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);
-app.use("/cart", cartRoutes)
-app.use("/address", addressRoutes)
+app.use("/cart", cartRoutes);
+app.use("/address", addressRoutes);
 
 app.listen(PORT, () => {
   console.log("Listening in port", PORT);

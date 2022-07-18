@@ -1,9 +1,13 @@
+const { Op } = require("sequelize");
 const {
   Cart,
   Product,
   Inventory,
   ProductImage,
+  Transaction,
+  TransactionItem,
 } = require("../../lib/sequelize");
+const moment = require("moment");
 const Service = require("../service");
 
 class CartService extends Service {
@@ -63,7 +67,6 @@ class CartService extends Service {
           }
         );
 
-          
         const findAllCartItems = await Cart.findAndCountAll({
           where: {
             user_id,
@@ -132,6 +135,121 @@ class CartService extends Service {
         message: "item removed",
         statusCode: 200,
         data: removeItemFromCart,
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+  static selectedCart = async (cart_id = [], user_id) => {
+    try {
+      const findCart = await Cart.findAll({
+        where: {
+          id: {
+            [Op.in]: cart_id,
+          },
+          user_id,
+        },
+        include: [
+          {
+            model: Product,
+            include: [{ model: ProductImage }],
+          },
+        ],
+      });
+
+      return this.handleSuccess({
+        message: "get selected cart",
+        statusCode: 200,
+        data: findCart,
+      });
+    } catch (err) {
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+  static checkoutCart = async (cart_id = [], user_id, total_price) => {
+    try {
+      const makeTransaction = await Transaction.create({
+        total_price,
+        status_transaction: "pending",
+        valid_until: moment().add(1, "day"),
+        user_id,
+      });
+
+      console.log(cart_id, "ini cart id");
+
+      const findCart = await Cart.findAll({
+        where: {
+          id: {
+            [Op.in]: cart_id,
+          },
+          user_id,
+        },
+        include: [
+          {
+            model: Product,
+            attributes: ["price"],
+          },
+        ],
+      });
+
+      const cartDetail = findCart.map((val) => {
+        return {
+          product_id: val.dataValues.product_id,
+          quantity: val.dataValues.quantity,
+          price: val.dataValues.Product.price,
+          transaction_id: makeTransaction.id,
+        };
+      });
+
+      const newTransaction = await TransactionItem.bulkCreate(cartDetail);
+
+      await Cart.destroy({
+        where: {
+          id: cart_id,
+          user_id,
+        },
+      });
+
+      return this.handleSuccess({
+        message: "checkout cart",
+        statusCode: 200,
+        data: newTransaction,
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static getAllCheckedOut = async (user_id) => {
+    try {
+      const findTransaction = await Transaction.findAll({
+        where: {
+          status_transaction: "pending",
+          user_id,
+        },
+        include: [
+          {
+            model: TransactionItem,
+            include: [{ model: Product, include: [ProductImage] }],
+          },
+        ],
+      });
+
+      return this.handleSuccess({
+        message: "get transaction",
+        statusCode: 200,
+        data: findTransaction,
       });
     } catch (err) {
       console.log(err);
