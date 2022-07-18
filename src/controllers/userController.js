@@ -1,6 +1,6 @@
 const UserService = require("../services/user");
 
-const addressController = {
+const userController = {
   editProfile: async (req, res) => {
     try {
       const serviceResult = await UserService.editProfile(req);
@@ -103,4 +103,4 @@ const addressController = {
   },
 };
 
-module.exports = addressController;
+module.exports = userController;
