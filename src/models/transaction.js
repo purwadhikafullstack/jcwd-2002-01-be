@@ -20,5 +20,4 @@ const Transaction = (sequelize) => {
     },
   });
 };
-
 module.exports = Transaction;
