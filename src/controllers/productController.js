@@ -114,6 +114,23 @@ const productControllers = {
       });
     }
   },
+
+  deleteProduct: async (req, res) => {
+    try {
+      const serviceResult = await ProductService.deleteProduct(req);
+      if (!serviceResult.success) throw serviceResult;
+      return res.status(serviceResult.statusCode || 200).json({
+        message: serviceResult.message,
+        result: serviceResult.data,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(err.statusCode || 500).json({
+        message: err.message,
+      });
+    }
+  },
+
   getInventoryByProductId: async (req, res) => {
     try {
       const serviceResult = await ProductService.getStockByProductId(req);

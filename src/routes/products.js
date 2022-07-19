@@ -7,7 +7,7 @@ const { AuthorizeLoggedInAdmin } = require("../middlewares/authMiddleware");
 
 const router = require("express").Router();
 
-router.get("/byId/:productId", productController.getProduct);
+router.get("/byId/:product", productController.getProduct);
 
 router.get("/", async (req, res) => {
   try {
@@ -59,7 +59,14 @@ router.delete(
   productController.deleteProductImage
 );
 
-router.get("/invenroty/:productId", productController.getInventoryByProductId);
+router.delete(
+  "/product/:productId",
+  AuthorizeLoggedInAdmin,
+  productController.deleteProduct
+);
+
+router.get("/inventory/:productId", productController.getInventoryByProductId);
+// router.get("/products", ProductService.getAllProduct);
 
 router.get("/quantity", productController.getAllProductWithQuantity);
 router.patch(

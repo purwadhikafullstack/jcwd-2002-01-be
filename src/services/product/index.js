@@ -70,7 +70,7 @@ class ProductService extends Service {
       const whereCategoryClause = {};
 
       if (selectedCategory) {
-        whereCategoryClause.CategoryId = selectedCategory;
+        whereCategoryClause.categoryId = selectedCategory;
       }
 
       const findProducts = await Product.findAndCountAll({
@@ -364,7 +364,7 @@ class ProductService extends Service {
 
   static deleteProductImage = async (req) => {
     try {
-      const { productId, id } = req.params;
+      const { productId } = req.params;
 
       await ProductImage.destroy({
         where: {
@@ -375,6 +375,27 @@ class ProductService extends Service {
 
       return this.handleSuccess({
         message: "succes delete image",
+        statusCode: 200,
+      });
+    } catch (err) {
+      return this.handleError({});
+    }
+  };
+
+  static deleteProduct = async (req) => {
+    try {
+      const { productId, id } = req.params;
+
+      console.log(req.params);
+
+      await Product.destroy({
+        where: {
+          id: productId,
+        },
+      });
+
+      return this.handleSuccess({
+        message: "succes delete product",
         statusCode: 200,
       });
     } catch (err) {
