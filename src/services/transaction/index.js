@@ -6,6 +6,7 @@ const {
   Product,
   ProductImage,
   StockOpname,
+  Inventory,
 } = require("../../lib/sequelize");
 const Service = require("../service");
 
@@ -79,6 +80,7 @@ class Transactions extends Service {
     try {
       const { transactionId } = req.params;
       const { status_transaction } = req.body;
+      const { token } = req;
 
       await Transaction.update(
         {
@@ -118,11 +120,25 @@ class Transactions extends Service {
               },
             }
           );
+
+          const findInventory = await Inventory.findOne({
+            where: {
+              product_id: val.dataValues.Product.Stock_opnames[0].product_id,
+            },
+          });
+
+          await Inventory.create({
+            quantity: val.dataValues.quantity,
+            expired_date: findInventory.dataValues.expired_date,
+            type: "sold",
+            product_id: val.dataValues.Product.Stock_opnames[0].product_id,
+            admin_id: token.admin_id,
+          });
         });
       }
 
       return this.handleSuccess({
-        message: "Accepted Order",
+        message: "Accepted order",
         statusCode: 200,
       });
     } catch (err) {
