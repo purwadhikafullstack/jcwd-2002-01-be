@@ -9,6 +9,7 @@ const {
   Inventory,
 } = require("../../lib/sequelize");
 const Service = require("../service");
+const fs = require("fs")
 
 class Transactions extends Service {
   static getAllTransactionByStatus = async (req) => {
@@ -145,6 +146,39 @@ class Transactions extends Service {
       console.log(err);
     }
   };
+  static uploadPrescription = async (req) => {
+        try {
+          const user_id = req.token.user_id;
+          const filename = req.file.filename;
+          const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
+          const filePath = "payment_images";
+
+          const prescription = await Transaction.create({
+            recipe_image: req.file
+              ? `${uploadFileDomain}/${filePath}/${filename}`
+              : undefined,
+            user_id,
+            status_transaction: "pending"
+          });
+
+          return this.handleSuccess({
+            message: "upload prescription",
+            statusCode: 200,
+            data: prescription,
+          });
+        } catch (err) {
+          console.log(err);
+
+          fs.unlinkSync(
+            __dirname + "/../public/proof-of-payment/" + req.file.filename
+          );
+
+          return this.handleError({
+            message: "server error",
+            statusCode: 500,
+          });
+        }
+  }
 }
 
 module.exports = Transactions;

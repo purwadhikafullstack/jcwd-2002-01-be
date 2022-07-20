@@ -40,6 +40,10 @@ app.use(
   express.static(`${__dirname}/public/proof-of-payment`)
 );
 app.use("/product_images", express.static(`${__dirname}/public/product-image`));
+app.use(
+  "/prescription_images",
+  express.static(`${__dirname}/public/prescription-image`)
+);
 
 app.use("/payment", paymentRoutes);
 app.use("/users", userRoutes);

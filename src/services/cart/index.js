@@ -182,7 +182,6 @@ class CartService extends Service {
         user_id,
       });
 
-      console.log(cart_id, "ini cart id");
 
       const findCart = await Cart.findAll({
         where: {
