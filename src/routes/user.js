@@ -2,7 +2,6 @@ const { userController } = require("../controllers");
 const fileUploader = require("../lib/uploader");
 const { AuthorizeLoggedInUser } = require("../middlewares/authMiddleware");
 const UserService = require("../services/user");
-const { userController } = require("../controllers");
 
 const router = require("express").Router();
 
