@@ -76,7 +76,6 @@ class ProductService extends Service {
       const findProducts = await Product.findAndCountAll({
         where: {
           ...req.query,
-          categoryId : selectedCategory || undefined,
           name: {
             [Op.like]: `%${name}%`,
           },
@@ -137,6 +136,8 @@ class ProductService extends Service {
       });
 
       const productId = newProduct.dataValues.id;
+
+      console.log(productId);
 
       const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
       const filePath = "product_images";
