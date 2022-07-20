@@ -24,6 +24,7 @@ const {
   cartRoutes,
   addressRoutes,
   paymentRoutes,
+  transactionRoutes,
 } = require("./routes");
 
 app.use("/auth", authRoutes);
@@ -44,6 +45,7 @@ app.use("/payment", paymentRoutes);
 app.use("/users", userRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);
+app.use("/transactions", transactionRoutes);
 app.use("/cart", cartRoutes);
 app.use("/address", addressRoutes);
 

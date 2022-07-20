@@ -15,5 +15,4 @@ const Payment = (sequelize) => {
     },
   });
 };
-
 module.exports = Payment;
