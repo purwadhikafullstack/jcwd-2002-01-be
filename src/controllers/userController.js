@@ -1,6 +1,6 @@
 const UserService = require("../services/user");
 
-const addressController = {
+const userController = {
   editProfile: async (req, res) => {
     try {
       const serviceResult = await UserService.editProfile(req);
@@ -82,6 +82,25 @@ const addressController = {
       });
     }
   },
+  getAllUserTransaction: async (req, res) => {
+    try {
+      const user_id = req.token.user_id;
+      const serviceResult = await UserService.getAllUserTransaction(
+        req.query,
+        user_id
+      );
+
+      if (!serviceResult.success) throw serviceResult;
+      return res.status(serviceResult.statusCode || 200).json({
+        message: serviceResult.message,
+        result: serviceResult.data,
+      });
+    } catch (err) {
+      return res.status(err.statusCode || 500).json({
+        message: err.message,
+      });
+    }
+  },
 };
 
-module.exports = addressController;
+module.exports = userController;

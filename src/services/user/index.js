@@ -1,6 +1,13 @@
 const fs = require("fs");
 const axiosInstance = require("../../lib/rajaOngkirInstance");
-const { User, Address } = require("../../lib/sequelize");
+const {
+  User,
+  Address,
+  Transaction,
+  TransactionItem,
+  Product,
+  ProductImage,
+} = require("../../lib/sequelize");
 const Service = require("../service");
 
 class UserService extends Service {
@@ -229,6 +236,73 @@ class UserService extends Service {
         data: findMainAddress,
       });
     } catch (err) {
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static getAllUserTransaction = async (query, user_id) => {
+    try {
+      const {
+        _limit = 30,
+        _page = 1,
+        _sortBy = "",
+        _sortDir = "",
+        selected_status,
+      } = query;
+
+      delete query._limit;
+      delete query._page;
+      delete query._sortBy;
+      delete query._sortDir;
+      delete query.selected_status;
+
+      const statusClause = {};
+
+      if (selected_status) {
+        statusClause.status_transaction = selected_status;
+      }
+
+      const findTransaction = await Transaction.findAndCountAll({
+        where: {
+          ...query,
+          ...statusClause,
+          user_id
+        },
+        include: [
+          {
+            model: TransactionItem,
+            include: [
+              {
+                model : Product,
+                include: {
+                  model: ProductImage,
+                },
+              },
+            ],
+          },
+        ],
+        limit: _limit ? parseInt(_limit) : undefined,
+        offset: (_page - 1) * _limit,
+        distinct: true,
+        order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
+      });
+
+      if (!findTransaction) {
+        return this.handleError({
+          message: "No transaction found",
+          statusCode: 500,
+        });
+      }
+      return this.handleSuccess({
+        message: "Transactions found",
+        statusCode: 200,
+        data: findTransaction,
+      });
+    } catch (err) {
+      console.log(err);
       return this.handleError({
         message: "server error",
         statusCode: 500,

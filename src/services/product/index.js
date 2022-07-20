@@ -137,6 +137,8 @@ class ProductService extends Service {
 
       const productId = newProduct.dataValues.id;
 
+      console.log(productId);
+
       const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
       const filePath = "product_images";
       const filename = req.files;
