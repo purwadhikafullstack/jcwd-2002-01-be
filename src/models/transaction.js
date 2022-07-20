@@ -7,18 +7,17 @@ const Transaction = (sequelize) => {
       allowNull: false,
     },
     status_transaction: {
-      type: DataTypes.DATE,
-      allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     recipe_image: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     valid_until: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
   });
 };
-
 module.exports = Transaction;

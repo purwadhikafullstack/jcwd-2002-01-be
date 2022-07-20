@@ -1,4 +1,5 @@
 const fs = require("fs");
+const axiosInstance = require("../../lib/rajaOngkirInstance");
 const { User, Address } = require("../../lib/sequelize");
 const Service = require("../service");
 
@@ -89,26 +90,46 @@ class UserService extends Service {
         is_main_address,
         address_label,
       } = req.body;
-      const { id } = req.params;
+      const user_id = req.token.user_id;
 
-      const findUser = await User.findByPk(id);
+      if (is_main_address) {
+        const findAddress = await Address.update(
+          {
+            is_main_address: false,
+          },
+          {
+            where: {
+              is_main_address: true,
+              user_id,
+            },
+          }
+        );
+      }
 
-      await Address.create({
+      const getProvince = await axiosInstance.get(`/province?id=${province}`);
+      const getCity = await axiosInstance.get(`/city?id=${city}`);
+
+      const provinceName = getProvince.data.rajaongkir.results.province;
+
+      const cityName = getCity.data.rajaongkir.results.city_name;
+
+      const newAddress = await Address.create({
         address,
         recipient_name,
         recipient_telephone,
         kecamatan,
-        province,
-        city,
+        province: provinceName,
+        city: cityName,
         postal_code,
         is_main_address,
         address_label,
-        user_id: findUser.id,
+        user_id,
       });
 
       return this.handleSuccess({
         message: "address succesfuly added",
         statusCode: 201,
+        data: newAddress,
       });
     } catch (err) {
       console.log(err);
@@ -132,9 +153,7 @@ class UserService extends Service {
         is_main_address,
         address_label,
       } = req.body;
-      const { id } = req.params;
-
-      const findUser = await User.findByPk(id);
+      const user_id = req.token.user_id;
 
       const editAddress = await Address.update(
         {
@@ -149,7 +168,7 @@ class UserService extends Service {
           address_label,
         },
         {
-          where: { user_id: findUser.id },
+          where: { user_id },
         }
       );
 
@@ -160,6 +179,56 @@ class UserService extends Service {
       });
     } catch (err) {
       console.log(err);
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+  static getAddress = async (req) => {
+    try {
+      const user_id = req.token.user_id;
+
+      const findAddress = await Address.findAll({
+        where: {
+          user_id,
+        },
+      });
+
+      if (!findAddress) {
+        return this.handleError({
+          message: "address not found",
+          statusCode: 400,
+        });
+      }
+
+      return this.handleSuccess({
+        message: "get all address",
+        statusCode: 200,
+        data: findAddress,
+      });
+    } catch (err) {
+      this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
+  static getMainAddress = async (user_id) => {
+    try {
+      const findMainAddress = await Address.findOne({
+        where: {
+          is_main_address: true,
+          user_id,
+        },
+      });
+
+      return this.handleSuccess({
+        message: "get main address",
+        statusCode: 200,
+        data: findMainAddress,
+      });
+    } catch (err) {
       return this.handleError({
         message: "server error",
         statusCode: 500,

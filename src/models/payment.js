@@ -7,14 +7,12 @@ const Payment = (sequelize) => {
       allowNull: false,
     },
     method: {
-      type: DataTypes.DATE,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     payment_image: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      type: DataTypes.STRING,
     },
   });
 };
-
 module.exports = Payment;

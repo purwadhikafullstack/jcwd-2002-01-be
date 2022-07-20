@@ -24,14 +24,6 @@ const Address = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    province: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    city: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     kecamatan: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -42,6 +34,12 @@ const Address = (sequelize) => {
     },
     is_main_address: {
       type: DataTypes.BOOLEAN,
+    },
+    province: {
+      type: DataTypes.STRING,
+    },
+    city: {
+      type: DataTypes.STRING,
     },
   });
 };

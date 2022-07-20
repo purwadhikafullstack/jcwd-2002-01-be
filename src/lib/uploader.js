@@ -23,7 +23,6 @@ const fileUploader = ({
     storage: storageConfig,
 
     fileFilter: (req, file, cb) => {
-      console.log(file);
       if (file.mimetype.split("/")[0] != fileType) {
         return cb(null, false);
       }

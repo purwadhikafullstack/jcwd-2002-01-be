@@ -1,9 +1,12 @@
+const { productController } = require("../controllers");
+const fileUploader = require("../lib/uploader");
 const ProductService = require("../services/product");
-const productControllers = require("../controllers/productController");
+
+const { AuthorizeLoggedInAdmin } = require("../middlewares/authMiddleware");
 
 const router = require("express").Router();
 
-router.get("/:productId", productControllers.getProduct);
+router.get("/byId/:productId", productController.getProduct);
 
 router.get("/", async (req, res) => {
   try {
@@ -22,5 +25,39 @@ router.get("/", async (req, res) => {
     });
   }
 });
+
+router.post(
+  "/",
+  fileUploader({
+    destinationFolder: "product-image",
+    fileType: "image",
+    prefix: "POST",
+  }).array("product_image_file"),
+  productController.createProduct
+);
+
+router.post(
+  "/addstock",
+  AuthorizeLoggedInAdmin,
+  productController.createProductStock
+);
+
+router.get("/quantity", productController.getAllProductWithQuantity);
+router.patch(
+  "/edit/:productId",
+  fileUploader({
+    destinationFolder: "product-image",
+    fileType: "image",
+    prefix: "POST",
+  }).array("product_image_file"),
+  productController.editProduct
+);
+
+router.delete(
+  "/product-image/:id/images/:productId",
+  productController.deleteProductImage
+);
+
+router.get("/invenroty/:productId", productController.getInventoryByProductId);
 
 module.exports = router;

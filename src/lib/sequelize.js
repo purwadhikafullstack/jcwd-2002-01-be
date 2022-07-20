@@ -31,6 +31,7 @@ const TransactionItem = require("../models/transaction_item")(sequelize);
 const Payment = require("../models/payment")(sequelize);
 const PurchaseOrder = require("../models/purchase_order")(sequelize);
 const MutationStock = require("../models/mutation_stock")(sequelize);
+const StockOpname = require("../models/stock_opname")(sequelize);
 
 //relation
 
@@ -66,9 +67,22 @@ Product.hasMany(ProductImage, { foreignKey: "product_id" });
 Cart.belongsTo(Product, { foreignKey: "product_id" });
 Product.hasMany(Cart, { foreignKey: "product_id" });
 
+TransactionItem.belongsTo(Product, { foreignKey: "product_id" });
+Product.hasMany(TransactionItem, { foreignKey: "product_id" });
+
+StockOpname.belongsTo(Product, { foreignKey: "product_id" });
+Product.hasMany(StockOpname, { foreignKey: "product_id" });
+
 //1:M cart and user
 Cart.belongsTo(User, { foreignKey: "user_id" });
 User.hasMany(Cart, { foreignKey: "user_id" });
+
+//1:M Product and transaction detail
+TransactionItem.belongsTo(Product, { foreignKey: "product_id" });
+Product.hasMany(TransactionItem, { foreignKey: "product_id" });
+
+Transaction.belongsTo(User, { foreignKey: "user_id" });
+User.hasMany(Transaction, { foreignKey: "user_id" });
 
 //1:M category and product
 Category.hasMany(Product);
@@ -89,6 +103,9 @@ Product.hasMany(PurchaseOrder, { foreignKey: "product_id" });
 MutationStock.belongsTo(Product, { foreignKey: "product_id" });
 Product.hasMany(MutationStock, { foreignKey: "product_id" });
 
+Inventory.belongsTo(Admin, { foreignKey: "admin_id" });
+Admin.hasMany(Inventory, { foreignKey: "admin_id" });
+
 module.exports = {
   User,
   Admin,
@@ -108,5 +125,6 @@ module.exports = {
   Payment,
   PurchaseOrder,
   MutationStock,
+  StockOpname,
   sequelize,
 };

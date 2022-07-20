@@ -1,9 +1,9 @@
-const ProductService = require("../services/product");
+const CartService = require("../services/cart");
 
-const productControllers = {
-  getProduct: async (req, res) => {
+const cartController = {
+  getAllCartItems: async (req, res) => {
     try {
-      const serviceResult = await ProductService.getProduct(req);
+      const serviceResult = await CartService.getAllCartItems(req);
 
       if (!serviceResult.success) throw serviceResult;
 
@@ -17,89 +17,97 @@ const productControllers = {
       });
     }
   },
-
-  createProduct: async (req, res) => {
+  addToCart: async (req, res) => {
     try {
-      const serviceResult = await ProductService.createProduct(req);
+      const user_id = req.token.user_id;
+      const { product_id, quantity, type } = req.body;
+      const serviceResult = await CartService.addToCart(
+        product_id,
+        user_id,
+        quantity,
+        type
+      );
 
       if (!serviceResult.success) throw serviceResult;
 
-      return res.status(serviceResult.statusCode || 201).json({
-        message: serviceResult.message,
-        result: serviceResult.data,
-      });
-    } catch (err) {
-      return res.status(err.statusCode || 500).json({
-        message: err.message,
-      });
-    }
-  },
-
-  getAllProductWithQuantity: async (req, res) => {
-    try {
-      const serviceResult = await ProductService.getAllProductWithQuantity(req);
-      if (!serviceResult.success) throw serviceResult;
-      return res.status(serviceResult.statusCode || 201).json({
-        message: serviceResult.message,
-        result: serviceResult.data,
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(err.statusCode || 500).json({
-        message: err.message,
-      });
-    }
-  },
-
-  createProductStock: async (req, res) => {
-    try {
-      const serviceResult = await ProductService.addStockProduct(req);
-      if (!serviceResult.success) throw serviceResult;
-      return res.status(serviceResult.statusCode || 201).json({
-        message: serviceResult.message,
-        result: serviceResult.data,
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(err.statusCode || 500).json({
-        message: err.message,
-      });
-    }
-  },
-  editProduct: async (req, res) => {
-    try {
-      const serviceResult = await ProductService.editProduct(req);
-      if (!serviceResult.success) throw serviceResult;
       return res.status(serviceResult.statusCode || 200).json({
         message: serviceResult.message,
         result: serviceResult.data,
       });
     } catch (err) {
-      console.log(err);
       return res.status(err.statusCode || 500).json({
         message: err.message,
       });
     }
   },
-
-  deleteProductImage: async (req, res) => {
+  removeItemfromCart: async (req, res) => {
     try {
-      const serviceResult = await ProductService.deleteProductImage(req);
+      const user_id = req.token.user_id;
+      const { product_id } = req.params;
+
+      const serviceResult = await CartService.removeFromCart(
+        user_id,
+        product_id
+      );
+
       if (!serviceResult.success) throw serviceResult;
+
       return res.status(serviceResult.statusCode || 200).json({
         message: serviceResult.message,
         result: serviceResult.data,
       });
     } catch (err) {
-      console.log(err);
       return res.status(err.statusCode || 500).json({
         message: err.message,
       });
     }
   },
-  getInventoryByProductId: async (req, res) => {
+  getSelectedCart: async (req, res) => {
     try {
-      const serviceResult = await ProductService.getStockByProductId(req);
+      const { cart_id } = req.body;
+      const user_id = req.token.user_id;
+
+      const serviceResult = await CartService.selectedCart(cart_id, user_id);
+
+      if (!serviceResult.success) throw serviceResult;
+
+      return res.status(serviceResult.statusCode || 200).json({
+        message: serviceResult.message,
+        result: serviceResult.data,
+      });
+    } catch (err) {
+      return res.status(err.statusCode || 500).json({
+        message: err.message,
+      });
+    }
+  },
+  checkoutCart: async (req, res) => {
+    try {
+      const { cart_id, total_price } = req.body;
+      const user_id = req.token.user_id;
+
+      const serviceResult = await CartService.checkoutCart(
+        cart_id,
+        user_id,
+        total_price
+      );
+
+      if (!serviceResult.success) throw serviceResult;
+
+      return res.status(serviceResult.statusCode || 200).json({
+        message: serviceResult.message,
+        result: serviceResult.data,
+      });
+    } catch (err) {
+      return res.status(err.statusCode || 500).json({
+        message: err.message,
+      });
+    }
+  },
+  getCheckoutCart: async (req, res) => {
+    try {
+      const user_id = req.token.user_id;
+      const serviceResult = await CartService.getAllCheckedOut(user_id);
 
       if (!serviceResult.success) throw serviceResult;
 
@@ -115,4 +123,4 @@ const productControllers = {
   },
 };
 
-module.exports = productControllers;
+module.exports = cartController;
