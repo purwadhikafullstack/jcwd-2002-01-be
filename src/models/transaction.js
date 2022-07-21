@@ -4,7 +4,7 @@ const Transaction = (sequelize) => {
   return sequelize.define("Transaction", {
     total_price: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     status_transaction: {
       type: DataTypes.STRING,
