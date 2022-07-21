@@ -11,8 +11,11 @@ const {
   Admin,
   AdminLoginSession,
   UserLoginSession,
+  ForgotPasswordToken,
 } = require("../../lib/sequelize");
 const mustache = require("mustache");
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 class authService extends Service {
   static register = async (req) => {
@@ -386,6 +389,115 @@ class authService extends Service {
       console.log(err);
       return this.handleError({
         message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+  static forgotPassword = async (email) => {
+    try {
+      console.log(email);
+
+      const findUser = await User.findOne({
+        where: {
+          email,
+        },
+      });
+
+      const passwordToken = nanoid(40);
+
+      await ForgotPasswordToken.update(
+        { is_valid: false },
+        {
+          where: {
+            user_id: findUser.id,
+            is_valid: true,
+          },
+        }
+      );
+
+      await ForgotPasswordToken.create({
+        token: passwordToken,
+        valid_until: moment().add(1, "hour"),
+        is_valid: true,
+        user_id: findUser.id,
+      });
+
+      const forgotPasswordLink = `http://localhost:3000/change-forgot-password/${passwordToken}`;
+
+      const template = fs
+        .readFileSync(__dirname + "/../../templates/forgot-template.html")
+        .toString();
+
+      const renderedTemplate = mustache.render(template, {
+        name: findUser.name,
+        forgot_password_url: forgotPasswordLink,
+      });
+
+      await mailer({
+        to: findUser.email,
+        subject: "Forgot password!",
+        html: renderedTemplate,
+      });
+
+      return this.handleSuccess({
+        message: "Your forgot password request was sent",
+        statusCode: 201,
+      });
+    } catch (err) {
+      console.log(err);
+
+      this.handleError({
+        message: "Server error",
+        statusCode: 500,
+      });
+    }
+  };
+  static changePassword = async (user_id, oldPassword, newPassword) => {
+    try {
+      const findUser = await User.findByPk(user_id);
+
+      // console.log(oldPassword);
+
+      if (!findUser) {
+        return this.handleError({
+          message: "User not found!",
+          statusCode: 400,
+        });
+      }
+
+      const comparePassword = bcrypt.compareSync(
+        oldPassword,
+        findUser.password
+      );
+
+      console.log(comparePassword);
+
+      if (!comparePassword) {
+        return this.handleError({
+          message: "Change password failed, your current password is wrong!",
+          statusCode: 400,
+        });
+      }
+
+      const newHashedPassword = bcrypt.hashSync(newPassword, 5);
+
+      await User.update(
+        { password: newHashedPassword },
+        {
+          where: {
+            id: user_id,
+          },
+        }
+      );
+
+      return this.handleSuccess({
+        message: "Password has been changed!",
+        statusCode: 200,
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error!",
         statusCode: 500,
       });
     }
