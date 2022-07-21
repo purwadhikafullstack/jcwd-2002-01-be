@@ -67,7 +67,7 @@ const userController = {
   },
   getMainAddress: async (req, res) => {
     try {
-      const user_id = req.token.user_id
+      const user_id = req.token.user_id;
       const serviceResult = await UserService.getMainAddress(user_id);
 
       if (!serviceResult.success) throw serviceResult;
