@@ -83,13 +83,14 @@ const cartController = {
   },
   checkoutCart: async (req, res) => {
     try {
-      const { cart_id, total_price } = req.body;
+      const { cart_id, total_price, addressId } = req.body;
       const user_id = req.token.user_id;
 
       const serviceResult = await CartService.checkoutCart(
         cart_id,
         user_id,
-        total_price
+        total_price,
+        addressId
       );
 
       if (!serviceResult.success) throw serviceResult;

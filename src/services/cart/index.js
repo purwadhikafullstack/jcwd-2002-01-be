@@ -6,6 +6,7 @@ const {
   ProductImage,
   Transaction,
   TransactionItem,
+  StockOpname,
 } = require("../../lib/sequelize");
 const moment = require("moment");
 const Service = require("../service");
@@ -21,7 +22,15 @@ class CartService extends Service {
         include: [
           {
             model: Product,
-            include: [{ model: ProductImage }],
+            include: [
+              {
+                model: ProductImage,
+              },
+              {
+                model: StockOpname,
+                attributes: ["amount", "product_id"],
+              },
+            ],
           },
         ],
       });
@@ -47,12 +56,6 @@ class CartService extends Service {
           product_id,
           user_id,
         },
-        include: [
-          {
-            model: Product,
-            include: [{ model: ProductImage }],
-          },
-        ],
       });
 
       if (findProductInCart) {
@@ -74,7 +77,15 @@ class CartService extends Service {
           include: [
             {
               model: Product,
-              include: [{ model: ProductImage }],
+              include: [
+                {
+                  model: ProductImage,
+                },
+                {
+                  model: StockOpname,
+                  attributes: ["amount", "product_id"],
+                },
+              ],
             },
           ],
         });
@@ -101,7 +112,15 @@ class CartService extends Service {
         include: [
           {
             model: Product,
-            include: [{ model: ProductImage }],
+            include: [
+              {
+                model: ProductImage,
+              },
+              {
+                model: StockOpname,
+                attributes: ["amount", "product_id"],
+              },
+            ],
           },
         ],
       });
@@ -128,8 +147,6 @@ class CartService extends Service {
           product_id,
         },
       });
-
-      console.log(product_id, user_id);
 
       return this.handleSuccess({
         message: "item removed",
@@ -173,15 +190,34 @@ class CartService extends Service {
       });
     }
   };
-  static checkoutCart = async (cart_id = [], user_id, total_price) => {
+  static checkoutCart = async (
+    cart_id = [],
+    user_id,
+    total_price,
+    addressId
+  ) => {
     try {
+      const findTransaction = await Transaction.findAll({
+        where: {
+          user_id,
+          status_transaction: "pending"
+        }
+      })  
+
+      if(findTransaction.length == 1){
+        return this.handleError({
+          message: "tidak bisa melakukan lebih dari 2 transaksi",
+          statusCode: 400
+        })
+      }
+
       const makeTransaction = await Transaction.create({
         total_price,
         status_transaction: "pending",
         valid_until: moment().add(1, "day"),
         user_id,
+        AddressId: addressId,
       });
-
 
       const findCart = await Cart.findAll({
         where: {
@@ -193,21 +229,58 @@ class CartService extends Service {
         include: [
           {
             model: Product,
-            attributes: ["price"],
+            include: [
+              {
+                model: StockOpname,
+                attributes: ["amount", "product_id"],
+              },
+            ],
           },
         ],
       });
 
-      const cartDetail = findCart.map((val) => {
-        return {
-          product_id: val.dataValues.product_id,
-          quantity: val.dataValues.quantity,
-          price: val.dataValues.Product.price,
+      let cartDetail = [];
+
+      for (let i = 0; i < findCart.length; i++) {
+        let cart = {};
+        const stock =
+          findCart[i].dataValues.Product.dataValues.Stock_opnames[0].dataValues
+            .amount;
+        const quantity = findCart[i].dataValues.quantity;
+
+        if (quantity > stock) {
+          return this.handleError({
+            message: "quantity melebihi stock",
+            statusCode: 500,
+          });
+        }
+
+        cart = {
+          product_id: findCart[i].dataValues.product_id,
+          quantity: findCart[i].dataValues.quantity,
+          price: findCart[i].dataValues.Product.price,
           transaction_id: makeTransaction.id,
         };
-      });
+
+        cartDetail.push(cart);
+      }
 
       const newTransaction = await TransactionItem.bulkCreate(cartDetail);
+
+      findCart.forEach(async (val) => {
+        await StockOpname.update(
+          {
+            amount:
+              val.dataValues.Product.dataValues.Stock_opnames[0].dataValues
+                .amount - val.dataValues.quantity,
+          },
+          {
+            where: {
+              product_id: val.dataValues.product_id,
+            },
+          }
+        );
+      });
 
       await Cart.destroy({
         where: {

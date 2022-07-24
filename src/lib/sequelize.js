@@ -81,6 +81,10 @@ User.hasMany(Cart, { foreignKey: "user_id" });
 TransactionItem.belongsTo(Product, { foreignKey: "product_id" });
 Product.hasMany(TransactionItem, { foreignKey: "product_id" });
 
+//1:M address and transaction
+Address.hasOne(Transaction );
+Transaction.belongsTo(Address);
+
 Transaction.belongsTo(User, { foreignKey: "user_id" });
 User.hasMany(Transaction, { foreignKey: "user_id" });
 
