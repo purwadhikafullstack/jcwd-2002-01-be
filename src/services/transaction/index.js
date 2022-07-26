@@ -9,36 +9,74 @@ const {
   Inventory,
 } = require("../../lib/sequelize");
 const Service = require("../service");
-const fs = require("fs")
+const fs = require("fs");
+const { Op } = require("sequelize");
 
 class Transactions extends Service {
   static getAllTransactionByStatus = async (req) => {
     try {
-      const { status_transaction, _limit = 30, _page = 1 } = req.query;
+      const {
+        status_transaction,
+        _limit = 30,
+        _page = 1,
+        _sortBy = "",
+        _sortDir = "",
+        username,
+        id,
+        date = [],
+      } = req.query;
 
       delete req.query.status_transaction;
       delete req.query._limit;
       delete req.query._page;
+      delete req.query._sortBy;
+      delete req.query._sortDir;
+      delete req.query.username;
+      delete req.query.date;
 
       const whereStatusClause = {};
+      const whereUsername = {};
+      const whereDate = {};
 
-      if (status_transaction) {
-        whereStatusClause.status_transaction = status_transaction;
+      if (status_transaction || id) {
+        if (status_transaction) {
+          whereStatusClause.status_transaction = status_transaction;
+        }
+        if (id) {
+          whereStatusClause.id = id;
+        }
+      }
+
+      if (username) {
+        whereUsername.username = {
+          [Op.like]: `%${username}%`,
+        };
+      }
+
+      if (date.length && !(date[0] === "" && date[0] === "")) {
+        whereDate.createdAt = {
+          [Op.between]: date,
+        };
       }
 
       const getAllTransaction = await Transaction.findAndCountAll({
         where: {
+          ...whereDate,
           ...whereStatusClause,
         },
         include: [
           {
             model: User,
+            where: {
+              ...whereUsername,
+            },
             attributes: ["username"],
             include: [
               {
                 model: Address,
               },
             ],
+            required: true,
           },
           {
             model: TransactionItem,
@@ -62,6 +100,7 @@ class Transactions extends Service {
         limit: _limit ? parseInt(_limit) : undefined,
         offset: (_page - 1) * _limit,
         distinct: true,
+        order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
       });
       return this.handleSuccess({
         message: "Transaction Found",
@@ -83,16 +122,7 @@ class Transactions extends Service {
       const { status_transaction } = req.body;
       const { token } = req;
 
-      await Transaction.update(
-        {
-          status_transaction,
-        },
-        {
-          where: { id: transactionId },
-        }
-      );
-
-      if (status_transaction === "ready delivery") {
+      if (status_transaction === "canceled") {
         const findProduct = await TransactionItem.findAll({
           where: {
             transaction_id: transactionId,
@@ -112,7 +142,7 @@ class Transactions extends Service {
           await StockOpname.update(
             {
               amount:
-                val.dataValues.Product.Stock_opnames[0].amount -
+                val.dataValues.Product.Stock_opnames[0].amount +
                 val.dataValues.quantity,
             },
             {
@@ -138,6 +168,15 @@ class Transactions extends Service {
         });
       }
 
+      await Transaction.update(
+        {
+          status_transaction,
+        },
+        {
+          where: { id: transactionId },
+        }
+      );
+
       return this.handleSuccess({
         message: "Accepted order",
         statusCode: 200,
@@ -147,38 +186,38 @@ class Transactions extends Service {
     }
   };
   static uploadPrescription = async (req) => {
-        try {
-          const user_id = req.token.user_id;
-          const filename = req.file.filename;
-          const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
-          const filePath = "payment_images";
+    try {
+      const user_id = req.token.user_id;
+      const filename = req.file.filename;
+      const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
+      const filePath = "payment_images";
 
-          const prescription = await Transaction.create({
-            recipe_image: req.file
-              ? `${uploadFileDomain}/${filePath}/${filename}`
-              : undefined,
-            user_id,
-            status_transaction: "pending"
-          });
+      const prescription = await Transaction.create({
+        recipe_image: req.file
+          ? `${uploadFileDomain}/${filePath}/${filename}`
+          : undefined,
+        user_id,
+        status_transaction: "pending",
+      });
 
-          return this.handleSuccess({
-            message: "upload prescription",
-            statusCode: 200,
-            data: prescription,
-          });
-        } catch (err) {
-          console.log(err);
+      return this.handleSuccess({
+        message: "upload prescription",
+        statusCode: 200,
+        data: prescription,
+      });
+    } catch (err) {
+      console.log(err);
 
-          fs.unlinkSync(
-            __dirname + "/../public/proof-of-payment/" + req.file.filename
-          );
+      fs.unlinkSync(
+        __dirname + "/../public/proof-of-payment/" + req.file.filename
+      );
 
-          return this.handleError({
-            message: "server error",
-            statusCode: 500,
-          });
-        }
-  }
+      return this.handleError({
+        message: "server error",
+        statusCode: 500,
+      });
+    }
+  };
 }
 
 module.exports = Transactions;

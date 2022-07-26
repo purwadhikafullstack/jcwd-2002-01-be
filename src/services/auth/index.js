@@ -14,8 +14,6 @@ const {
   ForgotPasswordToken,
 } = require("../../lib/sequelize");
 const mustache = require("mustache");
-const { OAuth2Client } = require("google-auth-library");
-const client = new OAuth2Client(process.env.CLIENT_ID);
 
 class authService extends Service {
   static register = async (req) => {
@@ -395,8 +393,6 @@ class authService extends Service {
   };
   static forgotPassword = async (email) => {
     try {
-      console.log(email);
-
       const findUser = await User.findOne({
         where: {
           email,
@@ -455,8 +451,6 @@ class authService extends Service {
   static changePassword = async (user_id, oldPassword, newPassword) => {
     try {
       const findUser = await User.findByPk(user_id);
-
-      // console.log(oldPassword);
 
       if (!findUser) {
         return this.handleError({
