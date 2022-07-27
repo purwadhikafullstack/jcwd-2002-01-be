@@ -49,7 +49,7 @@ class authService extends Service {
         is_valid: true,
       });
 
-      const verificationLink = `http://localhost:2000/auth/verify/${verificationToken}`;
+      const verificationLink = `http://localhost:2001/auth/verify/${verificationToken}`;
 
       const template = fs
         .readFileSync(__dirname + "/../../templates/verify.html")
