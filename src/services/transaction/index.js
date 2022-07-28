@@ -71,12 +71,10 @@ class Transactions extends Service {
               ...whereUsername,
             },
             attributes: ["username"],
-            include: [
-              {
-                model: Address,
-              },
-            ],
             required: true,
+          },
+          {
+            model: Address,
           },
           {
             model: TransactionItem,
