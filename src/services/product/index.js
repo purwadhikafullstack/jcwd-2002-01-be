@@ -22,6 +22,9 @@ class ProductService extends Service {
             model: ProductImage,
             attributes: ["image_url"],
           },
+          {
+            model: Category,
+          },
         ],
         where: {
           id: productId,
