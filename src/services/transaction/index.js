@@ -71,12 +71,10 @@ class Transactions extends Service {
               ...whereUsername,
             },
             attributes: ["username"],
-            include: [
-              {
-                model: Address,
-              },
-            ],
             required: true,
+          },
+          {
+            model: Address,
           },
           {
             model: TransactionItem,
@@ -152,6 +150,37 @@ class Transactions extends Service {
             }
           );
 
+          const findInventory = await Inventory.findOne({
+            where: {
+              product_id: val.dataValues.Product.Stock_opnames[0].product_id,
+            },
+          });
+
+          await Inventory.create({
+            quantity: val.dataValues.quantity,
+            expired_date: findInventory.dataValues.expired_date,
+            type: "sold",
+            product_id: val.dataValues.Product.Stock_opnames[0].product_id,
+            admin_id: token.admin_id,
+          });
+        });
+      } else if (status_transaction === "success") {
+        const findProduct = await TransactionItem.findAll({
+          where: {
+            transaction_id: transactionId,
+          },
+          include: [
+            {
+              model: Product,
+              include: {
+                model: StockOpname,
+                attributes: ["amount", "product_id"],
+              },
+            },
+          ],
+        });
+
+        findProduct.forEach(async (val) => {
           const findInventory = await Inventory.findOne({
             where: {
               product_id: val.dataValues.Product.Stock_opnames[0].product_id,
