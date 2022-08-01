@@ -59,6 +59,12 @@ router.delete(
   productController.deleteProductImage
 );
 
+router.delete(
+  "/product/:productId",
+  AuthorizeLoggedInAdmin,
+  productController.deleteProduct
+);
+
 router.get("/invenroty/:productId", productController.getInventoryByProductId);
 
 module.exports = router;
