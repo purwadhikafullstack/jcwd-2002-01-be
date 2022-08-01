@@ -33,7 +33,7 @@ const { userRoutes } = require("./routes");
 
 app.use(
   "/profile_images",
-  express.static(`${__dirname}/public/profile-picture`)
+  express.static(`${__dirname}/public/profile-image`)
 );
 app.use(
   "/payment_images",

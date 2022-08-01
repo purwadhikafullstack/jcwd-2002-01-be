@@ -13,7 +13,8 @@ const Service = require("../service");
 class UserService extends Service {
   static editProfile = async (req) => {
     try {
-      const { full_name, gender, email, age, id } = req.body;
+      const { full_name, gender, email, age } = req.body;
+      const id = req.token.user_id
 
       const findUser = await User.findByPk(id);
 
@@ -46,29 +47,28 @@ class UserService extends Service {
 
   static changeProfilePicture = async (req, res) => {
     try {
-      const { id } = req.params;
-
-      const findUser = await User.findByPk(id);
-
+      const id = req.token.user_id;
       const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
       const filePath = "profile_images";
       const filename = req.file?.filename;
 
-      const newUserData = await User.update(
+      await User.update(
         {
           profile_image: req.file
             ? `${uploadFileDomain}/${filePath}/${filename}`
             : undefined,
         },
         {
-          where: { id: findUser.id },
+          where: { id },
         }
       );
+
+      const userData = await User.findByPk(id);
 
       return this.handleSuccess({
         message: "user edited",
         statusCode: 200,
-        data: newUserData,
+        data: userData,
       });
     } catch (err) {
       console.log(err);
@@ -269,14 +269,14 @@ class UserService extends Service {
         where: {
           ...query,
           ...statusClause,
-          user_id
+          user_id,
         },
         include: [
           {
             model: TransactionItem,
             include: [
               {
-                model : Product,
+                model: Product,
                 include: {
                   model: ProductImage,
                 },
