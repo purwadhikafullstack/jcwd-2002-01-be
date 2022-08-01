@@ -385,6 +385,27 @@ class ProductService extends Service {
     }
   };
 
+  static deleteProduct = async (req) => {
+    try {
+      const { productId, id } = req.params;
+
+      console.log(req.params);
+
+      await Product.destroy({
+        where: {
+          id: productId,
+        },
+      });
+
+      return this.handleSuccess({
+        message: "succes delete product",
+        statusCode: 200,
+      });
+    } catch (err) {
+      return this.handleError({});
+    }
+  };
+
   static getStockByProductId = async (req) => {
     try {
       const { _limit = 30, _page = 1 } = req.query;
