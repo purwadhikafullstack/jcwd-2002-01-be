@@ -18,8 +18,15 @@ router.patch(
 
 router.post("/address", AuthorizeLoggedInUser, userController.addNewAddress);
 router.get("/address", AuthorizeLoggedInUser, userController.getAllAddress);
-router.get("/transaction", AuthorizeLoggedInUser, userController.getAllUserTransaction);
-router.get("/main-address", AuthorizeLoggedInUser, userController.getMainAddress);
-
+router.get(
+  "/transaction",
+  AuthorizeLoggedInUser,
+  userController.getAllUserTransaction
+);
+router.get(
+  "/main-address",
+  AuthorizeLoggedInUser,
+  userController.getMainAddress
+);
 
 module.exports = router;
