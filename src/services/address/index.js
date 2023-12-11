@@ -40,9 +40,6 @@ class AddressService extends Service {
   static getOngkir = async (req) => {
     try {
       const { product_id } = req.body;
-
-      
-
     } catch (err) {
       return this.handleError({
         message: "server error",
